@@ -5,6 +5,10 @@
     <title>Title</title>
 </head>
 <body>
-Main
+    {% for p in post %}
+        <li>{{p.name}} {{p}}</li>
+        <li>{{p.name}} {{p}}</li>
+
+    {% endfor %}
 </body>
 </html>
