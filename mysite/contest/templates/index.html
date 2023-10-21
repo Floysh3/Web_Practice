@@ -1,14 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    {% for p in post %}
-        <li>{{p.name}} {{p}}</li>
-        <li>{{p.name}} {{p}}</li>
+{% extends 'base.html' %}
 
+{% block content %}
+<h1>{{title}}</h1>
+<ul>
+    {% for p in posts %}
+    <li>
+        <h2>{{p.user}}</h2>
+        <p>{{p.description}}</p>
+        <hr>
+    </li>
     {% endfor %}
-</body>
-</html>
+</ul>
+
+{% endblock %}
