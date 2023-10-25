@@ -1,10 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
-class MyUser(User):
+class MyUser(AbstractUser):
     email_address = models.EmailField(max_length=50)
     registration_date = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.username
 
 
 class PicturePost(models.Model):
