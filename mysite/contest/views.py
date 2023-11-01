@@ -5,7 +5,11 @@ from django.template import loader
 from .models import *
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
-from django.http import HttpResponseNotFound
+from .serializers import PostSerializer
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 
 from .forms import CustomUserCreationForm
 # Create your views here.
@@ -29,3 +33,10 @@ class SignUpView(CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
+
+
+class GetPostInfoView(APIView):
+    def get(self, request):
+        queryset = PicturePost.objects.all()
+        serializer_for_queryset = PostSerializer(instance=queryset, many=True)
+        return Response(serializer_for_queryset.data)
