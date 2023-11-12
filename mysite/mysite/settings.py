@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'contest.apps.UsersConfig',
     "rest_framework",
+    'drf_yasg',
 ]
 AUTH_USER_MODEL = 'contest.MyUser'
 
