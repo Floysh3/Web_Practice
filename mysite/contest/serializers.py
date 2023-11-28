@@ -12,3 +12,9 @@ class LikeSerializer(serializers.Serializer):
     user = serializers.CharField(source='MyUser.username', max_length=150)
     post = serializers.CharField(source='PicturePost.name', max_length=50)
 
+
+
+class CommentSerializer(serializers.Serializer):
+    user = serializers.CharField(source='MyUser.username', max_length=150)
+    post = serializers.CharField(source='PicturePost.name', max_length=50)
+
