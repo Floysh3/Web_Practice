@@ -1,56 +1,146 @@
-from django.shortcuts import render
-from django.db import models
+from django.contrib.auth import logout, login
+from django.contrib.auth.views import LoginView
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from django.template import loader
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView
+from rest_framework import generics, permissions
+from rest_framework import serializers
+from .permissions import IsOwnerOrReadOnly
+from .utils import *
+from .forms import *
 from .models import *
-from django.http import HttpResponseNotFound
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-from rest_framework import status
-from rest_framework.generics import CreateAPIView, DestroyAPIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from .serializers import LikeSerializer
 # Create your views here.
 
-menu = [{'title':"Войти", 'url_name':'authorisation'},{'title':"Регистрация", 'url_name':'registration'}]
+menu = [{'title': 'Опубликовать фотографию', 'url_name': 'pub_photo'}, ]
 
-def index(request):
-    posts = PicturePost.objects.all()
-    return render(request, 'index.html', {'menu': menu, 'posts':posts, 'title':'Главная страница'})
+class Index(DataMixin, ListView, LoginRequiredMixin):
+    model = PicturePost
+    template_name = 'base.html'
+    context_object_name = 'post'
+    login_url = reverse_lazy('login')
 
-def user_profile(request):
-    template = loader.get_template('user_profile.html')
-    return render(request, 'user_profile.html', {'menu': menu, 'title':'Страница пользователя'})
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title="Главная страница")
+        kwargs['form'] = AddPostForm
 
-def photo(request):
-    template = loader.get_template('photo.html')
-    return HttpResponse(template.render())
+        return dict(list(context.items()) + list(c_def.items()))
 
-def authorisation(request):
-    template = loader.get_template('authorisation.html')
-    return render(request, 'authorisation.html', {'menu': menu, 'title':'Страница авторизации'})
+    def get_queryset(self):
+        return PicturePost.objects.filter(is_published=True)
 
-def registration(request):
-    template = loader.get_template('registration.html')
-    return render(request, 'registration.html', {'menu': menu, 'title':'Страница регистрации'})
-
-class LikeView(CreateAPIView):
-    permission_classes = [IsAuthenticated, ]
-
-    def post(self, request, *args, **kwargs):
-        post = PicturePost.objects.get(id=kwargs["id"])
-        user = request.user
-        like = Like.objects.create(post=post, user=user)
-        return Response(LikeSerializer(like).data, status=status.HTTP_200_OK)
+class MyUserList(generics.ListAPIView):
+    queryset = MyUser.objects.all()
+    serializer_class = serializers.MyUserSerializer
 
 
-class UnlikeView(CreateAPIView):
+class PhotoList(generics.ListCreateAPIView):
+    queryset = PicturePost.objects.all()
+    serializer_class = serializers.PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    permission_classes = [IsAuthenticated, ]
+class PhotoDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = PicturePost.objects.all()
+    serializer_class = serializers.PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                              IsOwnerOrReadOnly]
 
-    def delete(self, request, *args, **kwargs):
-        user = request.user
-        post = PicturePost.objects.get(kwargs=["id"])
-        like = Like.objects.get(user=user, post=post)
-        like.delete()
-        return Response(status=status.HTTP_200_OK)
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+def user_profile(request, user_id):
+    post = PicturePost.objects.all()
+    list_of_users = MyUser.objects.all()
+    context = {'menu': menu,
+               'title': 'Страница пользователя',
+               'list_of_users': list_of_users,
+               'user_id': user_id,
+               'post': post,
+               }
+    return render(request, 'user_profile.html', context=context)
+
+
+def list_of_users(request):
+    list_of_users = MyUser.objects.all()
+    return render(request, 'list_of_users.html',
+                  {'menu': menu, 'list_of_users': list_of_users, 'title': 'Список всех пользователей'})
+
+
+
+class Pub_Photo(LoginRequiredMixin, CreateView, AddPostForm):
+    form_class = AddPostForm
+    login_url = reverse_lazy('login')
+    template_name = 'pub_photo.html'
+    model = PicturePost
+    success_url = reverse_lazy('pub_photo')
+
+    def get_context_data(self, **kwargs):
+        kwargs['form'] = AddPostForm
+        kwargs['menu'] = menu
+        return super().get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.author = self.request.user
+        self.object.save()
+        return super().form_valid(form)
+
+def about(request):
+        return HttpResponse('Информация о сайте')
+
+def contact(request):
+        return HttpResponse('Служба поддержки')
+
+class RegisterUser(DataMixin, CreateView):
+    form_class = RegisterUserForm
+    template_name = 'register.html'
+    success_url = reverse_lazy('login')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Регистрация')
+
+        return dict(list(context.items()) + list(c_def.items()))
+
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        return redirect('index')
+
+
+class LoginUser(DataMixin, LoginView):
+    form_class = LoginUserForm
+    template_name = 'login.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Авторизация')
+
+        return dict(list(context.items()) + list(c_def.items()))
+
+    def get_success_url(self):
+        return reverse_lazy('index')
+
+
+def show_photo(request, photo_id):
+    post = get_object_or_404(PicturePost, pk=photo_id)
+    context = {'menu': menu,
+               'title': 'Страница фотографии',
+               'post': post,
+               }
+
+    return render(request, 'pub_photo.html', context=context)
+
+def top_photos(request):
+    return HttpResponse('Топ фотографий')
+
+
+
+def logout_user(request):
+    logout(request)
+
+    return redirect('index')

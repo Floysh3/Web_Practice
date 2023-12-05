@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .views import LikeView, UnlikeView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -20,13 +19,15 @@ schema_view = get_schema_view(
 )
 
 urlpatterns=[
-    path('', views.index, name='index'),
-    path('user_profile/', views.user_profile, name='user_profile'),
-    path('photo/', views.photo, name='photo'),
-    path('authorisation/', views.authorisation, name='authorisation'),
-    path('registration/', views.registration, name='registration'),
-    path('api/post/<int:id>/like/', LikeView.as_view()),
-    path('api/post/<int:id>/unlike/', UnlikeView.as_view()),
+    path('', views.Index.as_view(), name='index'),
+    path('user_profile/<int:user_id>', views.user_profile, name='user_profile'),
+    path('all_users/', views.list_of_users, name='list_of_users'),
+    path('pub_photo/', views.Pub_Photo.as_view(), name='pub_photo'),
+    path('photo/<int:photo_id>', views.show_photo, name='photo'),
+    path('login/', views.LoginUser.as_view(), name='login'),
+    path('logout/', views.logout_user, name='logout'),
+    path('signup/', views.RegisterUser.as_view(), name='register'),
+    path('top_photos/', views.top_photos, name='top_photos'),
     path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

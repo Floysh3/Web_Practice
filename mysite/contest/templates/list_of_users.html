@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{title}}</h1>
+<table border="1" borderclor="grey">
+<ul>
+    {% for x in list_of_users %}
+        <li><a href="{% url 'page_user' x.pk %}"> {{x}} </a></li>
+
+    {% endfor %}
+</ul>
+    </table>
+{% endblock %}

@@ -1,10 +1,47 @@
 <!DOCTYPE html>
+{% extends 'base.html' %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Профиль</title>
+    <title>{{title}}</title>
 </head>
 <body>
-Профиль
+{% block content %}
+<ul class="list-articles">
+    {% for u in list_of_users %}
+        {% if u.pk == user_id %}
+        <li><b>Ник:{{u.username}} </b></li>
+        <li><b>Id пользователя: {{user_id}}</b></li>
+        <li><b>{{u.first_name}} {{u.last_name}}</b></li>
+        <li><b>Дата первого захода: {{u.date_joined}} </b></li>
+        <li><b>Дата последнего входа на сайт: {{u.last_login}}</b></li>
+
+    <br><br>
+        {% endif %}
+    {% endfor %}
+    </ul>
+
+    <ul class="list-articles">
+        <li><b>Все фотографии пользователя: </b></li>
+        <br><br>
+        {% for p in post %}
+            {% if p.author_id == user_id %}
+
+                <li><img src="/media/{{p.photo}}" align="left" width="200" height="200"/>
+                <b>Название: </b>{{p.title}}<br>
+                <b> Описание: </b>{{p.description}}<br>
+                <b> Id фотографии: </b>{{p.id}} <br>
+                <b> Дата публикации: </b>{{p.photo_published}}
+            <div class="clear"></div>
+                     </li>
+        <br><br>
+
+
+            {% endif %}
+        {% endfor %}
+
+    </ul>
+{% endblock %}
 </body>
 </html>

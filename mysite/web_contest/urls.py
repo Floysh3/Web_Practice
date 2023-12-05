@@ -1,5 +1,5 @@
 """
-URL configuration for mysite project.
+URL configuration for web_contest project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -16,22 +16,19 @@ Including another URLconf
 """
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
-from . import settings
-from django.views.generic.base import TemplateView
-from django.urls import re_path
+from django.urls import include, path
+
+from contest.views import *
+from rest_framework import routers, serializers, viewsets
 
 
 urlpatterns = [
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
     path('', include('contest.urls')),
+    path('api/v1/photos', PhotoList.as_view()),
+    path('api/v1/users', MyUserList.as_view()),
     path('', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
 
 ]
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

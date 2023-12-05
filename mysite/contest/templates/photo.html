@@ -1,16 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<div>
-    <h2>
-    <strong>
-        Your photo here!!!
-    </strong>
-        </h2>
-</div>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3>Автор: {{post.author}}</h3>
+<h3>ID: {{post.id}}</h3>
+
+
+
+{% if post.photo %}
+<p><img src="{{post.photo.url}}" align="" width="1500" height="1500" /></p>
+{% endif %}
+
+{% endblock %}

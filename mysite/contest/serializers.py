@@ -1,20 +1,22 @@
-from rest_framework import serializers, renderers
-
-class PostSerializer(serializers.Serializer):
-    pub_date = serializers.DateTimeField(read_only=True)
-    description = serializers.CharField(max_length=300)
-    name = serializers.CharField(max_length=50)
-    user = serializers.CharField(source='MyUser.username', max_length=150)
 
 
 
-class LikeSerializer(serializers.Serializer):
-    user = serializers.CharField(source='MyUser.username', max_length=150)
-    post = serializers.CharField(source='PicturePost.name', max_length=50)
+from rest_framework import serializers
+from .models import *
 
 
+class PostSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.username')
 
-class CommentSerializer(serializers.Serializer):
-    user = serializers.CharField(source='MyUser.username', max_length=150)
-    post = serializers.CharField(source='PicturePost.name', max_length=50)
+    class Meta:
+        model = PicturePost
+        fields = ['id', 'title', 'description', 'photo', 'author']
+
+
+class MyUserSerializer(serializers.ModelSerializer):
+    photos_set = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = MyUser
+        fields = ['id', 'username', 'photos_set']
 
