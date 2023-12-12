@@ -21,6 +21,7 @@ from django.urls import include, path
 from contest.views import *
 from rest_framework import routers, serializers, viewsets
 
+from web_contest import settings
 
 urlpatterns = [
     path('', include('contest.urls')),
@@ -29,6 +30,6 @@ urlpatterns = [
     path('', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
 
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
