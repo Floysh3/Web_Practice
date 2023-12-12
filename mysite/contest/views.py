@@ -133,7 +133,7 @@ def show_photo(request, photo_id):
                'post': post,
                }
 
-    return render(request, 'pub_photo.html', context=context)
+    return render(request, 'photo.html', context=context)
 
 def top_photos(request):
     return HttpResponse('Топ фотографий')
